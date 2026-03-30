@@ -104,13 +104,16 @@
 ## 6.Docker 점검 로그
 
 #### docker --version     -> 버전 확인
-#### docker info          -> 데몬 동작 확인
-
 ```
 ajdcnd1310021@c5r2s2 ep1-1 % docker --version
 Docker version 28.5.2, build ecc6942
 
+```
 
+
+#### docker info          -> 데몬 동작 확인
+
+```
 ajdcnd1310021@c5r2s2 ep1-1 % docker info
 Client:
  Version:    28.5.2
