@@ -78,8 +78,6 @@ README.md 전체 구조
 <img width="588" height="83" alt="index html" src="https://github.com/user-attachments/assets/12dac37e-34a3-4a8d-b41a-c64823db925c" />
 
 
-```
-
 ## 5. 권한 실습 로그
 # 변경 전
 ls -la
