@@ -268,7 +268,7 @@ CONTAINER ID   NAME               CPU %     MEM USAGE / LIMIT     MEM %     NET 
 9f9251818e3a   naughty_poincare   0.00%     5.754MiB / 15.67GiB   0.04%     1.13kB / 126B   860kB / 8.19kB   7 
 ```
 
-
+<br>
 
 
 ## 8.컨테이너 실행 실습 로그
@@ -294,7 +294,7 @@ To generate this message, Docker took the following steps:
 To try something more ambitious, you can run an Ubuntu container with:
 ```
 
-
+<br>
 
 ### ubuntu 컨테이너 진입 + 명령 결과
 **docker run -it ubuntu bash**
@@ -308,6 +308,8 @@ bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  s
 root@8f2bea2a7f21:/# echo hello ubutu
 hello ubutu
 ```
+
+<br>
 
 ### run -it vs exec -it (접속 방식의 차이)
 
@@ -355,7 +357,7 @@ CONTAINER ID   IMAGE         COMMAND                  CREATED              STATU
 fe79e408d022   ubuntu        "sleep infinity"         About a minute ago   Up About a minute                      test-ubuntu2
 278401c96342   ubuntu        "bash"                   3 minutes ago        Exited (0) 2 minutes ago               test-ubuntu1
 ```
-
+<br>
 
 ```
 
