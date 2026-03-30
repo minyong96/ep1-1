@@ -79,20 +79,29 @@
 
 
 ## 5. 권한 실습 로그
-```
-# 변경 전
-ls -la
 
-# 권한 변경
-chmod 755 파일명
-chmod 644 파일명
+#### 파일 권한 변경 -> 600
+<img width="933" height="101" alt="2024 test file txt" src="https://github.com/user-attachments/assets/73447574-f653-41fd-ac90-d20994595e3e" />
 
-# 변경 후
-ls -la
+#### 디렉토리 권한 변경 -> 700
+<img width="972" height="143" alt="Pasted Graphic 12" src="https://github.com/user-attachments/assets/33b7b1ed-a47b-479b-93e8-bd7e80dbee64" />
+<img width="928" height="147" alt="total 16" src="https://github.com/user-attachments/assets/f6fa72d2-f411-415b-ac28-48a73d23b90f" />
 
-# 변경 전/후 비교 결과 기록
-```
-6️⃣ Docker 점검 로그
+
+#### 변경 전/후 비교 결과 기록(실제 실행,쓰기,읽기)
+* 실행 권한이 존재하지 않을때 
+<img width="1023" height="335" alt="133 маг" src="https://github.com/user-attachments/assets/a2940148-d439-4a61-8111-570e71cd7c7b" />
+
+* 쓰기 권한이 존재하지 않을때
+<img width="940" height="240" alt="total 24" src="https://github.com/user-attachments/assets/72b88c7c-1ac4-490a-b65d-c2d1ed30f0e1" />
+
+* 읽기 권한이 존재하지 않을때
+<img width="951" height="242" alt="total 24" src="https://github.com/user-attachments/assets/9c07d331-e79a-44be-b8c5-5ce014fa69ca" />
+
+
+---
+
+## 6.Docker 점검 로그
 ```
 docker --version     # 버전 확인
 docker info          # 데몬 동작 확인
