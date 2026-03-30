@@ -102,11 +102,82 @@
 ---
 
 ## 6.Docker 점검 로그
+
+#### docker --version     -> 버전 확인
+#### docker info          -> 데몬 동작 확인
+
 ```
-docker --version     # 버전 확인
-docker info          # 데몬 동작 확인
+ajdcnd1310021@c5r2s2 ep1-1 % docker --version
+Docker version 28.5.2, build ecc6942
+
+
+ajdcnd1310021@c5r2s2 ep1-1 % docker info
+Client:
+ Version:    28.5.2
+ Context:    orbstack
+ Debug Mode: false
+ Plugins:
+  buildx: Docker Buildx (Docker Inc.)
+    Version:  v0.29.1
+    Path:     /Users/ajdcnd1310021/.docker/cli-plugins/docker-buildx
+  compose: Docker Compose (Docker Inc.)
+    Version:  v2.40.3
+    Path:     /Users/ajdcnd1310021/.docker/cli-plugins/docker-compose
+
+Server:
+ Containers: 6
+  Running: 0
+  Paused: 0
+  Stopped: 6
+ Images: 2
+ Server Version: 28.5.2
+ Storage Driver: overlay2
+  Backing Filesystem: btrfs
+  Supports d_type: true
+  Using metacopy: false
+  Native Overlay Diff: true
+  userxattr: false
+ Logging Driver: json-file
+ Cgroup Driver: cgroupfs
+ Cgroup Version: 2
+ Plugins:
+  Volume: local
+  Network: bridge host ipvlan macvlan null overlay
+  Log: awslogs fluentd gcplogs gelf journald json-file local splunk syslog
+ CDI spec directories:
+  /etc/cdi
+  /var/run/cdi
+ Swarm: inactive
+ Runtimes: io.containerd.runc.v2 runc
+ Default Runtime: runc
+ Init Binary: docker-init
+ containerd version: 1c4457e00facac03ce1d75f7b6777a7a851e5c41
+ runc version: d842d7719497cc3b774fd71620278ac9e17710e0
+ init version: de40ad0
+ Security Options:
+  seccomp
+   Profile: builtin
+  cgroupns
+ Kernel Version: 6.17.8-orbstack-00308-g8f9c941121b1
+ Operating System: OrbStack
+ OSType: linux
+ Architecture: x86_64
+ CPUs: 6
+ Total Memory: 15.67GiB
+ Name: orbstack
+ ID: 6687e065-a269-4150-a4ea-3f1b290ed799
+ Docker Root Dir: /var/lib/docker
+ Debug Mode: false
+ Experimental: false
+ Insecure Registries:
+  ::1/128
+  127.0.0.0/8
+ Live Restore Enabled: false
+ Product License: Community Engine
 ```
-7️⃣ Docker 운영 명령 로그
+
+
+## Docker 운영 명령 로그
 ```
 docker pull ubuntu   # 이미지 다운로드
 docker images        # 이미지 목록
