@@ -360,6 +360,22 @@ fe79e408d022   ubuntu        "sleep infinity"         About a minute ago   Up Ab
 <br>
 
 ```
+➜  ep1-1 git:(main) ✗ docker exec -it 278401c96342 bash
+root@278401c96342:/# ps aux 
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.0  0.0   4596   624 pts/0    Ss+  13:19   0:00 bash
+root          18  4.2  0.0   4596  3952 pts/2    Ss   13:35   0:00 bash
+root          26  0.0  0.0   7896  4132 pts/2    R+   13:35   0:00 ps aux
+```
+```
+root@fe79e408d022:/# ps aux
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.1  0.0   2704  1512 ?        Ss   13:36   0:00 sleep infinity
+root           7  0.0  0.0   4596  4000 pts/0    Ss   13:36   0:00 bash
+root          15  0.0  0.0   7896  4184 pts/0    R+   13:36   0:00 ps aux
+```
+
+```
 
 📝 스스로 정리할 때 쓸 양식 (예시)
 구분	명령어	컨테이너 상태 변화	특징 및 용도
