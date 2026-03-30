@@ -1,7 +1,6 @@
 README.md 기록할 내용 정리
 README.md 전체 구조
 ```
-📋 복사
 1. 프로젝트 개요
 2. 실행 환경
 3. 수행 항목 체크리스트
@@ -48,18 +47,37 @@ README.md 전체 구조
 ```
 ## 4. 터미널 조작 로그
 
-```
-# 아래 명령어 + 실제 출력결과 기록
+### 아래 명령어 + 실제 출력결과 기록
 
-pwd                  # 현재 위치
-ls -la               # 숨김파일 포함 목록
-cd 폴더명            # 이동
-mkdir 폴더명         # 폴더 생성
-cp 파일1 파일2       # 복사
-mv 파일1 파일2       # 이동/이름변경
-rm 파일명            # 삭제
-cat 파일명           # 내용 확인
-touch 파일명         # 빈 파일 생성
+#### pwd -> 현재 위치
+<img width="408" height="48" alt="Usersajdcnd1310021ep1-1" src="https://github.com/user-attachments/assets/4a681ccb-8936-47cc-8620-97177ea3bc5e" />
+
+#### ls -la          -> 숨김파일 포함 목록
+<img width="908" height="145" alt="ajdend1310021" src="https://github.com/user-attachments/assets/36d95ddf-5ae8-445d-8319-536a1b3d9d6a" />
+
+#### cd 폴더명            -> 이동
+<img width="511" height="50" alt="Pasted Graphic 2" src="https://github.com/user-attachments/assets/84f07f53-28ec-4716-9362-2e2d30050f96" />
+
+#### mkdir 폴더명         -> 폴더 생성
+<img width="479" height="74" alt="ep1-1  mkdir app" src="https://github.com/user-attachments/assets/5eed17c5-4b09-411f-adfb-15e8ab34e3a1" />
+
+
+#### cp 파일1 파일2       -> 복사
+<img width="577" height="74" alt="Pasted Graphic 6" src="https://github.com/user-attachments/assets/1b8b56d7-474f-4be9-96e4-b1e1c7481a5f" />
+
+#### mv 파일1 파일2       -> 이동/이름변경
+<img width="860" height="74" alt="Pasted Graphic 7" src="https://github.com/user-attachments/assets/f1622f91-55c7-4d69-a0a3-fd80b4be12a2" />
+
+#### rm 파일명            -> 삭제
+<img width="541" height="122" alt="ajdcnd1310021@c5r2s2" src="https://github.com/user-attachments/assets/d137062f-dd0d-4781-8b50-2fdd8912ae51" />
+
+#### cat 파일명           -> 내용 확인
+<img width="520" height="225" alt="index html" src="https://github.com/user-attachments/assets/73884108-c5fd-4d69-8579-0dd6afcd92a7" />
+
+#### touch 파일명         -> 빈 파일 생성
+<img width="588" height="83" alt="index html" src="https://github.com/user-attachments/assets/12dac37e-34a3-4a8d-b41a-c64823db925c" />
+
+
 ```
 
 ## 5. 권한 실습 로그
