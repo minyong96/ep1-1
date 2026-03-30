@@ -1,5 +1,5 @@
-README.md 기록할 내용 정리
-README.md 전체 구조
+
+# README.md 전체 구조
 ```
 1. 프로젝트 개요
 2. 실행 환경
@@ -79,6 +79,7 @@ README.md 전체 구조
 
 
 ## 5. 권한 실습 로그
+```
 # 변경 전
 ls -la
 
@@ -90,23 +91,23 @@ chmod 644 파일명
 ls -la
 
 # 변경 전/후 비교 결과 기록
+```
 6️⃣ Docker 점검 로그
-bash
-📋 복사
+```
 docker --version     # 버전 확인
 docker info          # 데몬 동작 확인
+```
 7️⃣ Docker 운영 명령 로그
-bash
-📋 복사
+```
 docker pull ubuntu   # 이미지 다운로드
 docker images        # 이미지 목록
 docker ps            # 실행중 컨테이너
 docker ps -a         # 전체 컨테이너
 docker logs 컨테이너명  # 로그 확인
 docker stats         # 리소스 확인
+```
 8️⃣ 컨테이너 실행 실습 로그
-bash
-📋 복사
+```
 # hello-world 실행 결과
 docker run hello-world
 
@@ -118,9 +119,9 @@ echo "hello"
 # exit vs Ctrl+P+Q 차이 정리
 - exit      → 컨테이너 종료
 - Ctrl+P+Q  → 컨테이너 유지 (detach)
+```
 9️⃣ Dockerfile 커스텀 이미지
-bash
-📋 복사
+```
 # Dockerfile 전체 내용 기록
 # 각 줄의 목적 주석으로 설명
 
@@ -129,15 +130,16 @@ docker build -t 이미지명 .
 
 # 실행 명령 + 출력결과
 docker run -d -p 8080:80 이미지명
+
+```
 🔟 포트 매핑 접속 증거
-code
-📋 복사
+```
 - 실행 명령 기록
 - 브라우저 스크린샷 첨부 (주소창 포함)
   → localhost:8080 접속 화면
+```
 1️⃣1️⃣ 바인드 마운트 + 볼륨 영속성
-bash
-📋 복사
+```
 # [바인드 마운트]
 # 실행 명령
 docker run -v $(pwd)/app:/경로 이미지명
@@ -152,9 +154,9 @@ docker run -v 볼륨명:/경로 ...  # 연결
 # 컨테이너 내부 파일 생성
 docker rm 컨테이너명            # 삭제
 # 새 컨테이너 연결 후 파일 확인 → 유지됨 증명
+```
 1️⃣2️⃣ Git 설정 및 GitHub 연동
-bash
-📋 복사
+```
 git config user.name "이름"
 git config user.email "이메일"
 git config --global init.defaultBranch main
@@ -165,9 +167,9 @@ git commit -m "메시지"
 git push origin main
 
 # VSCode GitHub 연동 스크린샷 첨부
+```
 1️⃣3️⃣ 트러블슈팅 (2건 이상 필수!)
-code
-📋 복사
+```
 [문제 1]
 - 문제: 어떤 오류가 발생했는지
 - 원인 가설: 왜 그랬을 것 같은지
@@ -187,3 +189,4 @@ code
 3. 스크린샷은 이미지로 첨부
 4. 토큰/비밀번호 절대 포함 금지
 
+```
