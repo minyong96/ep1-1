@@ -332,21 +332,22 @@ OCI runtime exec failed: exec failed: unable to start container process: exec: "
 
 
 ### run -it vs exec -it 동작원리
-
-📌 핵심 1: 메인 프로세스 = 컨테이너의 생명
+```
+핵심 1: 메인 프로세스 = 컨테이너의 생명
    └─ 메인 프로세스 종료 = 컨테이너 자동 종료
 
-📌 핵심 2: run vs exec의 차이
+핵심 2: run vs exec의 차이
    └─ run: 메인 프로세스 시작 (새 컨테이너)
    └─ exec: 보조 프로세스 추가 (기존 컨테이너)
 
-📌 핵심 3: exit의 의미
+핵심 3: exit의 의미
    └─ run -it에서 exit: 메인 프로세스 종료 → 컨테이너 종료
    └─ exec -it에서 exit: 보조 프로세스만 종료 → 컨테이너 유지
 
-📌 핵심 4: 프로세스 관계
+핵심 4: 프로세스 관계
    └─ run -it: bash가 메인 (PID 1)
    └─ exec -it: sleep이 메인, bash는 형제 (PID 2)
+```
    
 ```
 ➜  ep1-1 git:(main) ✗ docker ps -a
