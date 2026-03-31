@@ -313,78 +313,100 @@ hello ubutu
 
 ### run -it vs exec -it (접속 방식의 차이)
 
-**docker run -it 사용**
-```
-➜  ep1-1 git:(main) ✗ docker run -it --name test-ubuntu1 ubuntu bash
-root@278401c96342:/# exit
-exit
-```
-
-**docker exec -it 사용**
-```
-➜  ep1-1 git:(main) ✗ docker run -d --name test-ubuntu2 ubuntu sleep infinity
-fe79e408d02280646e66c42c85fe2d9aed279019b4329799d7b86ff385e84b42
-➜  ep1-1 git:(main) ✗ docker ps
-CONTAINER ID   IMAGE     COMMAND            CREATED         STATUS        PORTS     NAMES
-fe79e408d022   ubuntu    "sleep infinity"   2 seconds ago   Up 1 second             test-ubuntu2
-➜  ep1-1 git:(main) ✗ docker exec -it fe79e408d022 bah          
-OCI runtime exec failed: exec failed: unable to start container process: exec: "bah": executable file not found in $PATH
-➜  ep1-1 git:(main) ✗ docker exec -it fe79e408d022 bash
-```
-
-
-### run -it vs exec -it 동작원리
-```
-핵심 1: 메인 프로세스 = 컨테이너의 생명
-   └─ 메인 프로세스 종료 = 컨테이너 자동 종료
-
-핵심 2: run vs exec의 차이
-   └─ run: 메인 프로세스 시작 (새 컨테이너)
-   └─ exec: 보조 프로세스 추가 (기존 컨테이너)
-
-핵심 3: exit의 의미
-   └─ run -it에서 exit: 메인 프로세스 종료 → 컨테이너 종료
-   └─ exec -it에서 exit: 보조 프로세스만 종료 → 컨테이너 유지
-
-핵심 4: 프로세스 관계
-   └─ run -it: bash가 메인 (PID 1)
-   └─ exec -it: sleep이 메인, bash는 형제 (PID 2)
-```
-   
 ```
 ➜  ep1-1 git:(main) ✗ docker ps -a
 CONTAINER ID   IMAGE         COMMAND                  CREATED              STATUS                       PORTS     NAMES
 fe79e408d022   ubuntu        "sleep infinity"         About a minute ago   Up About a minute                      test-ubuntu2
 278401c96342   ubuntu        "bash"                   3 minutes ago        Exited (0) 2 minutes ago               test-ubuntu1
 ```
+
+
+
+**docker run -it 사용**
+```
+➜  ep1-1 git:(main) ✗ docker run -it --name test-ubuntu1 ubuntu bash
+root@77354990b3c4:/# ps -ef
+UID        PID  PPID  C STIME TTY          TIME CMD
+root         1     0  0 06:40 pts/0    00:00:00 bash
+root         9     1  0 06:40 pts/0    00:00:00 ps -ef
+
+```
+
+-> 새 컨테이너 + PID 1 생성 즉 새로운 컨테이너를 만들고 그 안에서 PID 1프로세스를 시작한다 <br>
+컨테이너 == PID 1 프로세스 즉 bash가 죽으면 컨테이너가 종료 -> run 이 만든 프로세스가 PID 1<br>
+bash 종료시 컨테이너 종료 확인함 
+
+
+**docker exec -it 사용**
+```
+➜  ep1-1 git:(main) ✗ docker run -d  --name test-ubuntu2 ubuntu sleep infinity
+67114d6e8be280edf3764531c97b8c510786b1eb0de08ab64a9fec6cbb0609d1
+➜  ep1-1 git:(main) ✗ docker ps
+CONTAINER ID   IMAGE     COMMAND            CREATED         STATUS         PORTS     NAMES
+67114d6e8be2   ubuntu    "sleep infinity"   8 seconds ago   Up 7 seconds             test-ubuntu2
+➜  ep1-1 git:(main) ✗ docker exec -it test-ubuntu2 bash
+root@67114d6e8be2:/# ps -ef
+UID        PID  PPID  C STIME TTY          TIME CMD
+root         1     0  0 06:47 ?        00:00:00 sleep infinity
+root         7     0  0 06:48 pts/0    00:00:00 bash
+root        16     7  0 06:48 pts/0    00:00:00 ps -ef
+root@67114d6e8be2:/#
+```
+-> 이미 실행중인 컨테이너 namespace 에 붙어서 새로운 프로세스를 하나 더 실행 PID 7 프로세스가 bash인걸 확인할수잇음 <br>
+-> bash 종료 시 컨테이너 프로세스 살아있음 <br>
 <br>
 
+#### 중요한 차이: namespace 재사용
+**docker run → namespace 새로 생성**<br>
+**docker exec → 기존 namespace 재사용**<br>
+
+
+#### 컨테이너를 두개 띄웠을 시에 PID 1 이 동일한데 같은환경인가에 대한 테스트
+
+-> 해당 테스트는 host 기준으로 보면 pid가 다른걸 볼 수 있음 즉 PID 1은 컨테이너 재부 기준으로 볼 수 있고 ,namespace가 다르면 완전히 다른 격리 공간으로 볼 수 있다.
 ```
-➜  ep1-1 git:(main) ✗ docker exec -it 278401c96342 bash
-root@278401c96342:/# ps aux 
-USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-root           1  0.0  0.0   4596   624 pts/0    Ss+  13:19   0:00 bash
-root          18  4.2  0.0   4596  3952 pts/2    Ss   13:35   0:00 bash
-root          26  0.0  0.0   7896  4132 pts/2    R+   13:35   0:00 ps aux
-```
-```
-root@fe79e408d022:/# ps aux
-USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-root           1  0.1  0.0   2704  1512 ?        Ss   13:36   0:00 sleep infinity
-root           7  0.0  0.0   4596  4000 pts/0    Ss   13:36   0:00 bash
-root          15  0.0  0.0   7896  4184 pts/0    R+   13:36   0:00 ps aux
+➜  ep1-1 git:(main) ✗ docker ps
+CONTAINER ID   IMAGE     COMMAND            CREATED         STATUS         PORTS     NAMES
+285c4adb01ed   ubuntu    "sleep infinity"   2 seconds ago   Up 2 seconds             c2
+58c01fc2d23c   ubuntu    "sleep infinity"   2 seconds ago   Up 2 seconds             c1
 ```
 
 ```
-
-📝 스스로 정리할 때 쓸 양식 (예시)
-구분	명령어	컨테이너 상태 변화	특징 및 용도
-새로 실행	run -it	exit 시 종료됨	처음 설치나 일회성 작업 시 사용
-추가 접속	exec -it	exit 시에도 유지됨	실행 중인 서버 설정 변경 시 사용
-화면 연결	attach	Ctrl+C 시 종료 위험	현재 돌아가는 로그를 실시간 볼 때 사용
-살려두기	Ctrl+P,Q	계속 실행(Up)	작업 중 컨테이너를 끄지 않고 탈출할 때
-
+➜  ep1-1 git:(main) ✗ docker inspect c1 | grep Pid
+            "Pid": 1193,
+            "PidMode": "",
+            "PidsLimit": null,
+➜  ep1-1 git:(main) ✗ docker inspect c2 | grep Pid
+            "Pid": 1238,
+            "PidMode": "",
+            "PidsLimit": null,
 ```
+
+
+**lifecycle 관점 비교**
+
+| 항목                     | docker run | docker exec |
+| ---------------------- | ---------- | ----------- |
+| 컨테이너 생성                | O          | X           |
+| namespace 생성           | O          | X           |
+| cgroup 생성              | O          | X           |
+| PID 1 생성               | O          | X           |
+| 새 process 생성           | O          | O           |
+| 기존 container 필요        | X          | O           |
+| container lifecycle 영향 | O          | X           |
+
+
+-> docker run 은 새 VM하나 띄운느낌이고 docker exec는 이미 실행중인 서버에 ssh 접속한 느낌으로 이해했다.<br>
+컨테이너는 프로세스 집합이다 <br>
+컨테이너 = VM이 아니라 격리된 process namepsace라고 이해함
+
+
+#### 기존에 프로세스 콘솔에 붙는것을 확인 할 수잇는 attach (pid 1에붙음)
+<img width="1143" height="457" alt="image" src="https://github.com/user-attachments/assets/5d9f18fa-fcc6-4587-9520-e5463adeb9d8" />
+
+#### 새로운 프로세스를 실행하는걸 확일 할 수 있는 exec
+<img width="1141" height="452" alt="image" src="https://github.com/user-attachments/assets/8f99885d-9e31-43fc-ae1d-2c6c92b9c1cc" />
+
 
 
 ---
