@@ -602,6 +602,26 @@ CMD ["nginx", "-g", "daemon off;"]
 CONTAINER ID   IMAGE             COMMAND                  CREATED         STATUS                   PORTS                                         NAMES
 74d68d25d883   minyoung-server   "/usr/bin/tini -- ng…"   8 minutes ago   Up 8 minutes (healthy)   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   minyoung-server1
 
+➜  ep1-1 git:(main) ✗ curl http://localhost:8080
+<!DOCTYPE html>
+<html>
+<head>
+    <title>make minyoung server</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f4; }
+        h1 { color: #333; }
+        .status { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Nginx Web Server is Running!</h1>
+    <h2> Update Nginx:) </h2>
+    <p>Status: <span class="status">Graceful Shutdown & Non-root User Active</span></p>
+    <p>Managed by <b>tini</b> (PID 1)</p>
+</body>
+</html>
+
+
 ```
 
 ## 11. 바인드 마운트 + 볼륨 영속성
