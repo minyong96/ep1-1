@@ -411,7 +411,7 @@ CONTAINER ID   IMAGE     COMMAND            CREATED         STATUS         PORTS
 
 ---
 
-## 9️⃣ Dockerfile 커스텀 이미지
+## 9. Dockerfile 커스텀 이미지
 
 ```
 # syntax=docker/dockerfile:1.6
@@ -479,11 +479,13 @@ RUN groupadd -g ${GROUP_ID} appgroup \
 ############################################
 RUN mkdir -p ${APP_HOME} \
     /var/cache/nginx \
+    /var/lib/nginx \ 
     /var/run \
     /tmp \
     && chown -R appuser:appgroup \
         ${APP_HOME} \
         /var/cache/nginx \
+        /var/lib/nginx \
         /var/run \
         /var/log/nginx \
         /tmp
@@ -498,6 +500,7 @@ WORKDIR ${APP_HOME}
 ############################################
 # Copy application files
 ############################################
+COPY --chown=appuser:appgroup app/nginx/nginx.conf /etc/nginx/nginx.conf
 
 COPY --chown=appuser:appgroup app/index.html .
 COPY --chown=appuser:appgroup app/nginx/default.conf /etc/nginx/conf.d/default.conf
@@ -553,28 +556,49 @@ ENTRYPOINT ["/usr/bin/tini", "--"]
 # Start nginx in foreground
 ############################################
 CMD ["nginx", "-g", "daemon off;"]
-
 ```
 
 
 
 ```
-# Dockerfile 전체 내용 기록
-# 각 줄의 목적 주석으로 설명
-
-# 빌드 명령 + 출력결과
-docker build -t 이미지명 .
-
-# 실행 명령 + 출력결과
-docker run -d -p 8080:80 이미지명
+➜  ep1-1 git:(main) ✗ docker build -t minyoung-server .
+  
+[+] Building 5.3s (16/16) FINISHED                                           docker:orbstack
+ => [internal] load build definition from Dockerfile                                    0.1s
+ => => transferring dockerfile: 3.84kB                                                  0.0s
+ => resolve image config for docker-image://docker.io/docker/dockerfile:1.6             1.6s
+ => CACHED docker-image://docker.io/docker/dockerfile:1.6@sha256:ac85f380a63b13dfcefa8  0.0s
+ => [internal] load metadata for docker.io/library/ubuntu:22.04                         1.5s
+ => [internal] load .dockerignore                                                       0.1s
+ => => transferring context: 2B                                                         0.0s
+ => [stage-0 1/9] FROM docker.io/library/ubuntu:22.04@sha256:ce4a593b4e323dcc3dd728e39  0.0s
+ => [internal] load build context                                                       0.1s
+ => => transferring context: 509B                                                       0.0s
+ => CACHED [stage-0 2/9] RUN --mount=type=cache,target=/var/lib/apt/lists     --mount=  0.0s
+ => CACHED [stage-0 3/9] RUN groupadd -g 10001 appgroup     && useradd         --syste  0.0s
+ => CACHED [stage-0 4/9] RUN mkdir -p /var/www/html     /var/cache/nginx     /var/lib/  0.0s
+ => CACHED [stage-0 5/9] WORKDIR /var/www/html                                          0.0s
+ => [stage-0 6/9] COPY --chown=appuser:appgroup app/nginx/nginx.conf /etc/nginx/nginx.  0.1s
+ => [stage-0 7/9] COPY --chown=appuser:appgroup app/index.html .                        0.2s
+ => [stage-0 8/9] COPY --chown=appuser:appgroup app/nginx/default.conf /etc/nginx/conf  0.2s
+ => [stage-0 9/9] RUN ln -sf /dev/stdout /var/log/nginx/access.log     && ln -sf /dev/  0.4s
+ => exporting to image                                                                  0.4s
+ => => exporting layers                                                                 0.3s
+ => => writing image sha256:f390672b1a3faa016adcc001794174866bf7d598d5f62ad1af0631dd25  0.0s
+ => => naming to docker.io/library/minyoung-server       
+```
 
 ```
-🔟 포트 매핑 접속 증거
+➜  ep1-1 git:(main) ✗ docker run -d \
+  --name minyoung-server1 \
+  -p 8080:8080 \
+  -v $(pwd)/app/index.html:/var/www/html/index.html \
+  minyoung-server
 ```
-- 실행 명령 기록
-- 브라우저 스크린샷 첨부 (주소창 포함)
-  → localhost:8080 접속 화면
-```
+
+## 10. 포트 매핑 접속 증거
+<img width="1319" height="734" alt="image" src="https://github.com/user-attachments/assets/25164d7e-b7ef-43e7-a935-2b73e699232d" />
+
 1️⃣1️⃣ 바인드 마운트 + 볼륨 영속성
 ```
 # [바인드 마운트]
