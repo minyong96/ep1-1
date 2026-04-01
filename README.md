@@ -597,22 +597,43 @@ CMD ["nginx", "-g", "daemon off;"]
 ```
 
 ## 10. 포트 매핑 접속 증거
-<img width="1319" height="734" alt="image" src="https://github.com/user-attachments/assets/25164d7e-b7ef-43e7-a935-2b73e699232d" />
+```
+➜  app git:(main) ✗ docker ps
+CONTAINER ID   IMAGE             COMMAND                  CREATED         STATUS                   PORTS                                         NAMES
+74d68d25d883   minyoung-server   "/usr/bin/tini -- ng…"   8 minutes ago   Up 8 minutes (healthy)   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   minyoung-server1
 
-1️⃣1️⃣ 바인드 마운트 + 볼륨 영속성
+```
+
+## 11. 바인드 마운트 + 볼륨 영속성
+
+**수정 전**
+<img width="1319" height="734" alt="image" src="https://github.com/user-attachments/assets/25164d7e-b7ef-43e7-a935-2b73e699232d" />
 
 **index.html 수정 후 바뀐 정적 파일**
 <img width="1314" height="539" alt="image" src="https://github.com/user-attachments/assets/b9787577-60c9-4f2e-a59a-e6f36399b26e" />
 
 
-# [Docker 볼륨]
-docker volume create 볼륨명     # 생성
-docker run -v 볼륨명:/경로 ...  # 연결
-# 컨테이너 내부 파일 생성
-docker rm 컨테이너명            # 삭제
-# 새 컨테이너 연결 후 파일 확인 → 유지됨 증명
+### 컨테이너 내부 파일 생성
 ```
-1️⃣2️⃣ Git 설정 및 GitHub 연동
+➜  ep1-1 git:(main) ✗ docker rm minyoung-server1
+minyoung-server3
+➜  ep1-1 git:(main) ✗ docker run -d --name minyoung-server2 -p 8080:8080 -v $(pwd)/app/index.html:/var/www/html/index.html -v "$(pwd)/my_logs:/var/log/nginx" minyoung-server
+c4c963b883f24e3ea64a932a507c4e6cf9c01750cafd82c01b7da4e1f70f9381
+➜  ep1-1 git:(main) ✗ docker ps
+CONTAINER ID   IMAGE             COMMAND                  CREATED         STATUS                           PORTS                                         NAMES
+c4c963b883f2   minyoung-server   "/usr/bin/tini -- ng…"   2 seconds ago   Up 1 second (health: starting)   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   minyoung-server2
+➜  ep1-1 git:(main) ✗ ls
+Dockerfile README.md  app        my_logs
+➜  ep1-1 git:(main) ✗ cat my_logs
+cat: my_logs: Is a directory
+➜  ep1-1 git:(main) ✗ cd my_logs 
+➜  my_logs git:(main) ✗ ls
+access.log error.log
+
+```
+
+
+## 12. Git 설정 및 GitHub 연동
 ```
 git config user.name "이름"
 git config user.email "이메일"
