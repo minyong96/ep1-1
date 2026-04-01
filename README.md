@@ -600,14 +600,10 @@ CMD ["nginx", "-g", "daemon off;"]
 <img width="1319" height="734" alt="image" src="https://github.com/user-attachments/assets/25164d7e-b7ef-43e7-a935-2b73e699232d" />
 
 1️⃣1️⃣ 바인드 마운트 + 볼륨 영속성
-```
-# [바인드 마운트]
-# 실행 명령
-docker run -v $(pwd)/app:/경로 이미지명
 
-# 변경 전 화면 스크린샷
-# index.html 수정
-# 변경 후 화면 스크린샷
+**index.html 수정 후 바뀐 정적 파일**
+<img width="1314" height="539" alt="image" src="https://github.com/user-attachments/assets/b9787577-60c9-4f2e-a59a-e6f36399b26e" />
+
 
 # [Docker 볼륨]
 docker volume create 볼륨명     # 생성
