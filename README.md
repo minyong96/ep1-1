@@ -633,20 +633,82 @@ CONTAINER ID   IMAGE             COMMAND                  CREATED         STATUS
 <img width="1314" height="539" alt="image" src="https://github.com/user-attachments/assets/b9787577-60c9-4f2e-a59a-e6f36399b26e" />
 
 
+**볼륨 영속성**
+```
+➜  ep1-1 git:(main) ✗ docker run -d --name vol-test -v test-volume:/var/www/html minyoung-server
+412def013863c4248bc277a6b5a6113fde229ef5b2351f7d74bfbbc792d89db8
+➜  ep1-1 git:(main) ✗ docker ps
+CONTAINER ID   IMAGE             COMMAND                  CREATED        STATUS                           PORTS      NAMES
+412def013863   minyoung-server   "/usr/bin/tini -- ng…"   1 second ago   Up 1 second (health: starting)   8080/tcp   vol-test
+
+➜  ep1-1 git:(main) ✗ docker exec -it vol-test bash -lc "echo hi > hello.txt && cat hello.txt"          
+hi
+➜  ep1-1 git:(main) ✗ docker rm -f vol-test
+vol-test
+➜  ep1-1 git:(main) ✗ docker exec -it vol-test bash -lc "echo hi > hello.txt && cat hello.txt"
+➜  ep1-1 git:(main) ✗ docker run -d --name vol-test2 -v test-volume:/var/www/html minyoung-server
+93cd671cb9df78a722a96fe4c701552efa37b8e2e18267ce7cba0d1960c2a47b
+➜  ep1-1 git:(main) ✗ docker exec -it vol-test2 bash -lc "cat hello.txt" 
+hi
+
+```
+
 
 ## 12. Git 설정 및 GitHub 연동
 ```
-git config user.name "이름"
-git config user.email "이메일"
-git config --global init.defaultBranch main
-git config --list   # 결과 기록
 
-git add .
-git commit -m "메시지"
-git push origin main
+➜  ep1-1 git:(main) ✗ git add * 
+➜  ep1-1 git:(main) ✗ git status
+On branch main
+Your branch is up to date with 'origin/main'.
 
-# VSCode GitHub 연동 스크린샷 첨부
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   Dockerfile
+	new file:   app/index.html
+	new file:   app/nginx/default.conf
+	new file:   app/nginx/nginx.conf
+
+➜  ep1-1 git:(main) ✗ git commit -m "feat: make dockerfile"
+[main 188aee7] feat: make dockerfile
+ Committer: 김민영 <ajdcnd1310021@c5r2s2.codyssey.kr>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 4 files changed, 187 insertions(+)
+ create mode 100644 Dockerfile
+ create mode 100644 app/index.html
+ create mode 100644 app/nginx/default.conf
+ create mode 100644 app/nginx/nginx.conf
+➜  ep1-1 git:(main) git config --global user.name "minyong96" 
+➜  ep1-1 git:(main) git config --global user.email "aldud159357@gmail.com"
+
+
+➜  ep1-1 git:(main) ✗ git config --list
+
+credential.helper=osxkeychain
+user.name=minyong96
+user.email=aldud159357@gmail.com
+core.repositoryformatversion=0
+core.filemode=true
+core.bare=false
+core.logallrefupdates=true
+core.ignorecase=true
+core.precomposeunicode=true
+remote.origin.url=https://github.com/minyong96/ep1-1.git
+remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
+branch.main.remote=origin
+branch.main.merge=refs/heads/main
 ```
+
 1️⃣3️⃣ 트러블슈팅 (2건 이상 필수!)
 ```
 [문제 1]
