@@ -613,25 +613,6 @@ CONTAINER ID   IMAGE             COMMAND                  CREATED         STATUS
 <img width="1314" height="539" alt="image" src="https://github.com/user-attachments/assets/b9787577-60c9-4f2e-a59a-e6f36399b26e" />
 
 
-### 컨테이너 내부 파일 생성
-```
-➜  ep1-1 git:(main) ✗ docker rm minyoung-server1
-minyoung-server3
-➜  ep1-1 git:(main) ✗ docker run -d --name minyoung-server2 -p 8080:8080 -v $(pwd)/app/index.html:/var/www/html/index.html -v "$(pwd)/my_logs:/var/log/nginx" minyoung-server
-c4c963b883f24e3ea64a932a507c4e6cf9c01750cafd82c01b7da4e1f70f9381
-➜  ep1-1 git:(main) ✗ docker ps
-CONTAINER ID   IMAGE             COMMAND                  CREATED         STATUS                           PORTS                                         NAMES
-c4c963b883f2   minyoung-server   "/usr/bin/tini -- ng…"   2 seconds ago   Up 1 second (health: starting)   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   minyoung-server2
-➜  ep1-1 git:(main) ✗ ls
-Dockerfile README.md  app        my_logs
-➜  ep1-1 git:(main) ✗ cat my_logs
-cat: my_logs: Is a directory
-➜  ep1-1 git:(main) ✗ cd my_logs 
-➜  my_logs git:(main) ✗ ls
-access.log error.log
-
-```
-
 
 ## 12. Git 설정 및 GitHub 연동
 ```
