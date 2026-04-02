@@ -1247,7 +1247,7 @@ PID file
 
 ---
 
-# 해결 방법 (권장)
+# 해결 방법 
 
 ```
 pid /tmp/nginx.pid;
