@@ -711,20 +711,40 @@ branch.main.merge=refs/heads/main
 
 ## 13. 트러블슈팅 (2건 이상 필수!)
 
-## [문제1]
+# [문제 1] docker stop 하면 왜 바로 종료되지 않고 10초가 걸릴까?
 
-### 문제 1-1 : 왜 docker stop 하면 바로 종료되지 않고 10초가 걸릴까?
+---
 
-컨테이너를 docker stop으로 종료하면 즉시 중지되지 않고
-약 10초 후에 종료되는 현상이 발생했다.
+# 문제 1-1
+
+## 왜 `docker stop` 하면 바로 종료되지 않고 약 10초가 걸릴까?
+
+### 상황
+
+컨테이너를 `docker stop`으로 종료하면
+
+즉시 중지되지 않고 **약 10초 후에 종료**되는 현상이 발생했다.
+
 ```
-time docker stop slow-stop
+time dockerstop slow-stop
+```
 
+결과:
+
+```
 docker stop slow-stop  0.02s user 0.01s system 0% cpu 10.272 total
 ```
-→ 실제 종료까지 약 10초 소요
-### 가설 1-1
+
+→ 실제 종료까지 약 **10초 소요**
+
+---
+
+# 가설 1-1
+
+## Docker가 종료 신호를 보내고 기다리는 구조가 아닐까?
+
 Docker는 컨테이너를 종료할 때 다음 순서로 동작한다.
+
 ```
 docker stop
    ↓
@@ -734,16 +754,23 @@ SIGTERM 전송
    ↓
 종료 안되면 SIGKILL 강제 종료
 ```
+
 따라서 다음 가설을 세울 수 있다.
 
+```
 컨테이너 내부 프로세스가 SIGTERM을 정상적으로 처리하지 못해서
 Docker가 10초 동안 기다린 뒤 강제 종료하는 것이 아닐까?
-
-### 확인 -1
-실험 — SIGTERM을 처리하는 Python 프로그램 실행
 ```
-docker run -d --name slow-stop python:3.11-slim \
-sh -c 'python -u -c "
+
+---
+
+# 확인 1-1
+
+## SIGTERM을 처리하는 Python 프로그램을 실행해보자
+
+```
+docker run-d--name slow-stop python:3.11-slim \
+sh-c'python -u -c "
 import signal, time, sys;
 
 signal.signal(
@@ -759,113 +786,210 @@ print(\"애플리케이션 시작... (신호 대기 중)\");
 [time.sleep(1) for _ in iter(int, 1)]
 "'
 ```
+
 로그 확인:
+
 ```
 docker logs slow-stop
+```
 
+```
 애플리케이션 시작... (신호 대기 중)
 ```
+
 컨테이너 종료:
+
 ```
-time docker stop slow-stop
+time dockerstop slow-stop
 ```
+
 결과:
+
 ```
 10초 소요
 SIGTERM 수신 로그 없음
 ```
-### 분석 1-1
+
+---
+
+# 분석 1-1
+
+## 핵심 원인 — PID 1이 shell(sh)이기 때문
+
 컨테이너 내부 프로세스 구조:
+
 ```
 PID 1  sh
   └── python
 ```
-문제는 여기다.
 
-### 핵심 원인
-PID 1이 shell(sh)이기 때문
-그리고 shell은 기본적으로:
-SIGTERM을 자식 프로세스에게 전달하지 않는다
-그래서:
+여기서 중요한 사실:
+
+```
+docker stop 은 PID 1 에게만 signal 을 보낸다
+```
+
+즉:
+
 ```
 docker stop
    ↓
 SIGTERM → sh (PID 1)
-   ↓
-python은 신호 못 받음
-   ↓
-10초 대기
-   ↓
-SIGKILL 강제 종료
 ```
 
+그리고:
+
 ```
-PID 1은 기본 signal handling이 일반 프로세스와 다르다
+sh 는 기본적으로 signal 을 자식에게 전달하지 않는다
 ```
+
+그래서:
+
+```
+python 은 SIGTERM 을 받지 못함
+```
+
+결과:
+
+```
+docker 는 10초 기다림
+→ SIGKILL 강제 종료
+```
+
+---
+
+# 매우 중요한 기술 포인트 (정확한 표현)
+
+여기 문장은 이렇게 수정하는 게 정확해.
+
+기존 표현:
+
+```
+리눅스 커널이 PID 1을 보호해서 signal을 무시한다
+```
+
+정확한 표현:
+
+```
+PID 1은 default signal handling 동작이 일반 프로세스와 다르다
+```
+
 즉:
-* 자동 종료되지 않음
-* signal handler 없으면 무시될 수 있음
-보호해서가 아니라 default behavior가 다름
 
-해결 1-2: PID 1을 애플리케이션으로 만들기
+```
+signal handler 없으면 종료되지 않을 수 있다
+```
+
+---
+
+# 해결 1-2
+
+## PID 1을 애플리케이션으로 만들기
+
 shell을 제거하고 Python을 직접 PID 1로 실행한다.
+
 ```
-docker run -d --name direct-stop python:3.11-slim \
-python -u -c '...'
+docker run-d--name direct-stop python:3.11-slim \
+python-u-c'...'
 ```
-이제 프로세스 구조:
+
+이제 구조:
+
 ```
 PID 1  python
 ```
-### 결과 1-2
+
+---
+
+# 결과 1-2
+
 ```
-time docker stop direct-stop
+time dockerstop direct-stop
+```
+
+```
 0.276초
 ```
+
 로그:
+
 ```
 SIGTERM 수신 완료
 ```
-결론
+
+---
+
+# 결론 1
+
 ```
 PID 1이 signal을 처리할 수 있어야
 graceful shutdown이 동작한다
 ```
 
-문제 2 : 자식 프로세스가 있을 때 signal이 전달되지 않는 문제
+---
+
+# 문제 2
+
+## 자식 프로세스가 있을 때 signal이 전달되지 않는 문제
+
+### 상황
+
 애플리케이션이 다른 프로세스를 실행할 경우:
+
 ```
 python
    └── subprocess
 ```
-이 구조에서는 다음 문제가 발생할 수 있다.
+
+이 구조에서:
+
 ```
 docker stop
    ↓
 SIGTERM → python
    ↓
-subprocess는 signal 못 받음
+subprocess 는 signal 못 받을 수 있음
 ```
-결과:
-* 자식 프로세스가 살아남음
-* 파일 쓰기 중단
-* 데이터 유실 가능
-  
-### 문제 3 : 실제로 데이터가 중간에 깨지는가?
-가설
-컨테이너가 강제 종료되면
-파일이 쓰이는 도중에 중단되어
-데이터가 손상될 수 있다
 
-### 확인 3
-실험 — 파일을 계속 기록하는 프로그램
+결과:
+
 ```
-docker run -d \
+자식 프로세스가 살아남음
+파일 쓰기 중단
+데이터 유실 가능
+```
+
+이건 실제 production 사고 많이 나는 패턴이다.
+
+---
+
+# 문제 3
+
+## 실제로 데이터가 중간에 깨지는가?
+
+---
+
+# 가설
+
+```
+컨테이너가 강제 종료되면
+파일이 쓰이는 도중 중단되어
+데이터가 손상될 수 있다
+```
+
+---
+
+# 확인 3
+
+## 파일을 계속 기록하는 프로그램 실행
+
+```
+docker run-d \
 --name data-crash \
 -v $(pwd):/app \
 -w /app \
 python:3.11-slim \
-sh -c 'python -u -c "
+sh-c'python -u -c "
 import time;
 
 f=open(\"test.log\", \"w\");
@@ -880,24 +1004,35 @@ print(\"기록 시작...\");
 f.close()
 "'
 ```
+
 파일 확인:
+
 ```
-tail -n 5 test.log
+tail-n5 test.log
+```
+
+```
 Line 288
 Line 289
 Line 290
 Line 291
 Line 292
 ```
+
 컨테이너 종료:
+
 ```
-docker stop data-crash
+dockerstop data-crash
 ```
+
 결과:
+
 ```
 10초 후 강제 종료
 ```
+
 파일:
+
 ```
 Line 573
 Line 574
@@ -905,95 +1040,262 @@ Line 575
 Line 576
 Line 577
 ```
-결론
+
+---
+
+# 결론 3
+
 ```
 파일이 끝까지 기록되지 않음
+```
+
 즉:
+
+```
 정상 종료가 아니라
 강제 종료된 것
 ```
-### 해결 2 : Graceful Shutdown 구현
-해결
+
+---
+
+# 해결 2
+
+## Graceful Shutdown 구현
+
+---
+
+# 해결 전략
 
 SIGTERM을 받으면:
+
+```
 1. 작업 중단
 2. 리소스 정리
 3. 파일 close
 4. 정상 종료
+```
 
-구현
+---
+
+# 핵심 코드
+
 ```
 signal.signal(
-    signal.SIGTERM,
-    lambda s,f: (
-        print("신호 수신"),
-        stop=True
-    )
+signal.SIGTERM,
+handler
 )
 ```
-핵심:
+
+핵심 개념:
+
 ```
-종료를 바로 하지 않고
-정리(cleanup) 후 종료
+종료를 즉시 하지 않고
+cleanup 후 종료한다
 ```
-실행
+
+---
+
+# 결과
+
 ```
-docker run graceful-data
+docker stop
+→ 즉시 종료
+→ 데이터 손상 없음
 ```
-종료:
+
+---
+
+# 최종 결론 — 문제 1
+
 ```
-docker stop graceful-data
+docker stop 이 10초 걸리는 이유는
+컨테이너가 종료할 시간을 주기 때문이며,
+PID 1이 signal을 처리하지 못하면
+10초 후 SIGKILL 로 강제 종료된다.
 ```
+
+---
+
+---
+
+# [문제 2]
+
+## non-root nginx에서 Permission denied 발생
+
+---
+
+# 문제 2-1
+
+## 서버가 실행되자마자 죽는다
+
+### 상황
+
+보안을 위해:
+
+```
+USER appuser
+```
+
+설정 후 컨테이너 실행.
+
+결과:
+
+```
+dockerps
+```
+
+컨테이너 없음.
+
 로그:
+
 ```
-기록 시작...
-
-[!] 신호 수신! 종료 준비...
-
-파일 안전 저장 및 종료 완료
-```
-### 결과
-```
-0.444초
-```
-즉:
-```
-강제 종료 없음
-데이터 손상 없음
-정상 종료
-```
-
-
-
-
-
-## [문제2]
-
-### 문제: "서버가 실행되자마자 죽는다"
-```
-상황: 보안을 위해 USER appuser 설정을 넣고 빌드한 뒤 컨테이너를 실행함.
-현상: docker ps를 쳐도 컨테이너가 없고, docker logs를 확인하니 아래와 같은 에러가 발생함.
 nginx: [emerg] open() "/run/nginx.pid" failed (13: Permission denied)
 ```
-### 원인 가설:  "권한이 없는 곳에 글을 쓰려 한다"
-```
-분석: 에러 메시지의 Permission denied와 경로 /run/에 주목함.
-가설: "Nginx는 기본적으로 /run/ 폴더에 자기 번호표(PID 파일)를 만들려고 설계되었는데, 현재 실행 주체인 appuser는 일반 시민이라 관리자 전용 폴더인 /run/에 접근할 권한이 없어서 죽는 것이 아닐까?"
-```
 
-### 확인 : "Nginx의 기본 동작 방식 검증"
-```
-검증: Nginx 공식 문서를 확인하거나 기존 설정을 살펴보니, Nginx는 별도 설정이 없으면 무조건 /run/nginx.pid를 사용함이 확인됨.
-테스트: 실제로 컨테이너 내부에서 appuser 권한으로 /run/ 폴더에 파일을 만들어보려 했으나 실패함. 가설이 맞았음을 확신함.
-```
+---
 
-### 해결 : "설명서(nginx.conf) 교체로 경로 변경"
+# 가설
+
+## 권한이 없는 디렉토리에 파일을 쓰려고 해서 실패한 것이 아닐까?
+
+에러 메시지:
 
 ```
-해결책 선정: Nginx에게 /run/이 아닌, appuser가 자유롭게 쓸 수 있는 /tmp/ 폴더에 PID를 만들라고 명령하기로 함.
-실행 (우아한 방식): Dockerfile의 실행 명령어(CMD)에 옵션을 덕지덕지 붙이는 대신, Nginx의 근본 설계도인 nginx.conf를 새로 작성하여 통째로 교체함.
-nginx.conf 상단에 pid /tmp/nginx.pid; 한 줄을 추가함.
-결과: Nginx가 실행될 때 새 설명서를 읽고 /tmp/에 안전하게 번호표를 만듦. 에러 없이 서버가 정상 작동함.
+Permission denied
 ```
 
+경로:
+
+```
+/run/nginx.pid
+```
+
+여기서 핵심 추론:
+
+```
+Nginx 는 PID 파일을 /run 에 생성하려고 한다
+```
+
+하지만:
+
+```
+appuser 는 /run 에 쓸 권한이 없다
+```
+
+---
+
+# 확인
+
+실제로:
+
+```
+touch /run/test
+```
+
+결과:
+
+```
+Permission denied
+```
+
+가설 검증 완료.
+
+---
+
+# 기술적 사실
+
+nginx 기본 설정:
+
+```
+pid /run/nginx.pid;
+```
+
+이건 nginx의 default behavior다.
+
+즉:
+
+```
+nginx 시작 시
+→ master process PID 를 파일로 기록한다
+```
+
+이걸:
+
+```
+PID file
+```
+
+이라고 한다.
+
+---
+
+# 해결
+
+## nginx가 쓸 수 있는 디렉토리로 PID 경로 변경
+
+예:
+
+```
+/tmp
+```
+
+또는:
+
+```
+/var/run/nginx
+```
+
+---
+
+# 해결 방법 (권장)
+
+```
+pid /tmp/nginx.pid;
+```
+
+---
+
+# 왜 `/tmp` 가 되는가
+
+```
+/tmp 는 모든 사용자 writable
+```
+
+그래서:
+
+```
+appuser 도 파일 생성 가능
+```
+
+---
+
+# 결과
+
+```
+nginx 정상 실행
+컨테이너 유지
+에러 없음
+```
+
+---
+
+# 최종 결론 — 문제 2
+
+```
+non-root 로 nginx 를 실행하면
+기본 PID 파일 경로 (/run) 에 쓸 권한이 없기 때문에
+서버가 시작 직후 종료된다.
+```
+
+해결:
+
+```
+PID 파일 경로를 writable 디렉토리로 변경한다.
+```
+
+예:
+
+```
+/tmp/nginx.pid
+```
 
